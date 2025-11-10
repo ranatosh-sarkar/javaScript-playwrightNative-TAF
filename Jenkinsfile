@@ -9,11 +9,11 @@ pipeline {
   }
 
   parameters {
-    string(name: 'GREP',    defaultValue: '',  description: 'Playwright grep (e.g., "Sanity")')
+    string(name: 'GREP', defaultValue: '', description: 'Playwright grep')
     choice(name: 'PROJECT', choices: ['Chromium','Firefox'], description: 'Playwright project')
     booleanParam(name: 'HEADED', defaultValue: false, description: 'Run headed')
-    string(name: 'ENV',     defaultValue: 'QA', description: 'Framework ENV value')
-    string(name: 'WORKERS', defaultValue: '4',  description: 'Parallel workers')
+    string(name: 'ENV', defaultValue: 'QA', description: 'Framework ENV value')
+    string(name: 'WORKERS', defaultValue: '4', description: 'Parallel workers')
   }
 
   environment {
@@ -27,8 +27,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        checkout([
-          $class: 'GitSCM',
+        checkout([$class: 'GitSCM',
           branches: [[name: '*/master']],
           userRemoteConfigs: [[url: 'https://github.com/ranatosh-sarkar/javaScript-playwrightNative-TAF.git']]
         ])
@@ -39,7 +38,6 @@ pipeline {
       steps {
         bat 'node -v & npm -v'
         bat 'npm ci'
-        // Windows: DO NOT use --with-deps
         bat 'npx playwright install'
       }
     }
@@ -47,14 +45,13 @@ pipeline {
     stage('Run tests') {
       steps {
         script {
-          // Skip three flaky tests by title
+          // Skip the three flaky specs by title
           def skipRegex   = '(E2E Booking #1|E2E Booking #2|E2E Booking #3)'
           def invertFlag  = "--grep-invert \"${skipRegex}\""
           def headedFlag  = (env.PW_HEADED?.toBoolean()) ? '--headed' : ''
           def workersFlag = "--workers=${params.WORKERS}"
           def projFlag    = "--project=${params.PROJECT}"
 
-          // keep stage marked failed but continue to post actions
           catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
             bat """
               npx cross-env ENV=${env.ENV} ^
@@ -68,16 +65,22 @@ pipeline {
         }
       }
     }
+
+    stage('Build Allure HTML (npx)') {
+      steps {
+        // Make the report without needing Jenkins' Allure tool
+        bat 'npx allure generate allure-results --clean -o allure-report'
+      }
+    }
   }
 
   post {
     always {
-      // Artifacts from your workspace (see screenshot)
-      archiveArtifacts artifacts: 'test-results/**',      allowEmptyArchive: true
-      archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
-      archiveArtifacts artifacts: 'allure-results/**',    allowEmptyArchive: true
+      archiveArtifacts artifacts: 'test-results/**',        allowEmptyArchive: true
+      archiveArtifacts artifacts: 'playwright-report/**',   allowEmptyArchive: true
+      archiveArtifacts artifacts: 'allure-results/**',      allowEmptyArchive: true
+      archiveArtifacts artifacts: 'allure-report/**',       allowEmptyArchive: true
 
-      // Publish Playwright HTML (CLI default folder)
       publishHTML(target: [
         reportDir: 'playwright-report',
         reportFiles: 'index.html',
@@ -87,11 +90,14 @@ pipeline {
         allowMissing: true
       ])
 
-      // Allure commandline (Manage Jenkins → Tools → Allure Commandline: name = allure-2)
-      allure includeProperties: false,
-             jdk: '',
-             commandline: 'allure-2',
-             results: [[path: 'allure-results']]
+      publishHTML(target: [
+        reportDir: 'allure-report',
+        reportFiles: 'index.html',
+        reportName: 'Allure Report',
+        keepAll: true,
+        alwaysLinkToLastBuild: true,
+        allowMissing: true
+      ])
     }
     success { echo '✅ Tests passed.' }
     failure { echo '❌ Tests failed.' }
