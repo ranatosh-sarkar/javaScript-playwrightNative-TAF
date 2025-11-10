@@ -72,34 +72,54 @@ pipeline {
         bat 'npx allure generate allure-results --clean -o allure-report'
       }
     }
+
+    stage('Node setup & deps') {
+  steps {
+    bat 'node -v & npm -v'
+    bat 'npm ci'
+    bat 'npx playwright install'
+    // Ensure Allure CLI is available for npx
+    bat 'npm ls allure-commandline || npm i -D allure-commandline'
   }
+}
 
-  post {
-    always {
-      archiveArtifacts artifacts: 'test-results/**',        allowEmptyArchive: true
-      archiveArtifacts artifacts: 'playwright-report/**',   allowEmptyArchive: true
-      archiveArtifacts artifacts: 'allure-results/**',      allowEmptyArchive: true
-      archiveArtifacts artifacts: 'allure-report/**',       allowEmptyArchive: true
-
-      publishHTML(target: [
-        reportDir: 'playwright-report',
-        reportFiles: 'index.html',
-        reportName: 'Playwright HTML Report',
-        keepAll: true,
-        alwaysLinkToLastBuild: true,
-        allowMissing: true
-      ])
-
-      publishHTML(target: [
-        reportDir: 'allure-results',
-        reportFiles: 'index.html',
-        reportName: 'Allure Report',
-        keepAll: true,
-        alwaysLinkToLastBuild: true,
-        allowMissing: true
-      ])
+stage('Build Allure HTML (npx)') {
+  steps {
+    script {
+      // Don't let a reporting hiccup fail the pipeline
+      catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+        // Use the npm package’s binary (works on Windows):
+        bat 'npx allure-commandline generate allure-results --clean -o allure-report'
+      }
     }
-    success { echo '✅ Tests passed.' }
-    failure { echo '❌ Tests failed.' }
   }
+}
+  }
+
+post {
+  always {
+    archiveArtifacts artifacts: 'test-results/**',      allowEmptyArchive: true
+    archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+    archiveArtifacts artifacts: 'allure-results/**',    allowEmptyArchive: true
+    archiveArtifacts artifacts: 'allure-report/**',     allowEmptyArchive: true
+
+    // Playwright’s built-in HTML
+    publishHTML(target: [
+      reportDir: 'playwright-report',
+      reportFiles: 'index.html',
+      reportName: 'Playwright HTML Report',
+      keepAll: true, alwaysLinkToLastBuild: true, allowMissing: true
+    ])
+
+    // Allure HTML (the generated site)
+    publishHTML(target: [
+      reportDir: 'allure-report',
+      reportFiles: 'index.html',
+      reportName: 'Allure Report',
+      keepAll: true, alwaysLinkToLastBuild: true, allowMissing: true
+    ])
+  }
+  success { echo '✅ Tests passed.' }
+  failure { echo '❌ Tests failed.' }
+}
 }
