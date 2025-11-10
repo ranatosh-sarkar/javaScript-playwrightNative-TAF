@@ -47,8 +47,9 @@ module.exports = defineConfig({
   ],
 
   reporter: [
-    ['list', { printSteps: true }],
-    ['html', { outputFolder: 'reports/html-report', open: 'never' }],
-    ['allure-playwright', { outputFolder: 'allure-results' }]
+  ['list', { printSteps: true }],
+  ['html', { outputFolder: 'reports/html-report', open: 'never' }],
+  ['allure-playwright', { outputFolder: 'allure-results' }],
+  ['junit', { outputFile: 'test-results/results.xml' }]
   ]
 });
