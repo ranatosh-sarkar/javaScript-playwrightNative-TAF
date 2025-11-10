@@ -91,7 +91,7 @@ pipeline {
       ])
 
       publishHTML(target: [
-        reportDir: 'allure-report',
+        reportDir: 'allure-results',
         reportFiles: 'index.html',
         reportName: 'Allure Report',
         keepAll: true,
