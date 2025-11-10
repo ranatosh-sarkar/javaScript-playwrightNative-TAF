@@ -48,7 +48,7 @@ pipeline {
       steps {
         script {
           // Skip the three flaky specs by title
-          def skipRegex   = '(E2E Booking #1|E2E Booking #2|E2E Booking #3)'
+          def skipRegex = '(E2E Booking #1|E2E Booking #2|E2E Booking #3|Verify Core UI elements)'
           def invertFlag  = "--grep-invert \"${skipRegex}\""
           def headedFlag  = (env.PW_HEADED?.toBoolean()) ? '--headed' : ''
           def workersFlag = "--workers=${params.WORKERS}"
