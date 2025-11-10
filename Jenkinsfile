@@ -35,12 +35,14 @@ pipeline {
     }
 
     stage('Node setup & deps') {
-      steps {
-        bat 'node -v & npm -v'
-        bat 'npm ci'
-        bat 'npx playwright install'
-      }
-    }
+  steps {
+    bat 'node -v & npm -v'
+    bat 'npm ci'
+    bat 'npx playwright install'
+    // Ensure Allure CLI is available for npx
+    bat 'npm ls allure-commandline || npm i -D allure-commandline'
+  }
+}
 
     stage('Run tests') {
       steps {
@@ -65,16 +67,6 @@ pipeline {
         }
       }
     }
-
-    stage('Node setup & deps') {
-  steps {
-    bat 'node -v & npm -v'
-    bat 'npm ci'
-    bat 'npx playwright install'
-    // Ensure Allure CLI is available for npx
-    bat 'npm ls allure-commandline || npm i -D allure-commandline'
-  }
-}
 
 stage('Build Allure HTML (npx)') {
   steps {
