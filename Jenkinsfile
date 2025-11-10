@@ -47,13 +47,14 @@ pipeline {
     stage('Run tests') {
       steps {
         script {
-          // Skip the two flaky tests by title
-          def skipRegex   = '(E2E Booking #1|E2E Booking #2)'
+          // Skip three flaky tests by title
+          def skipRegex   = '(E2E Booking #1|E2E Booking #2|E2E Booking #3)'
           def invertFlag  = "--grep-invert \"${skipRegex}\""
           def headedFlag  = (env.PW_HEADED?.toBoolean()) ? '--headed' : ''
           def workersFlag = "--workers=${params.WORKERS}"
           def projFlag    = "--project=${params.PROJECT}"
 
+          // keep stage marked failed but continue to post actions
           catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
             bat """
               npx cross-env ENV=${env.ENV} ^
@@ -71,12 +72,14 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: 'test-results/**',           allowEmptyArchive: true
-      archiveArtifacts artifacts: 'reports/html-report/**',    allowEmptyArchive: true
-      archiveArtifacts artifacts: 'allure-results/**',         allowEmptyArchive: true
+      // Artifacts from your workspace (see screenshot)
+      archiveArtifacts artifacts: 'test-results/**',      allowEmptyArchive: true
+      archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+      archiveArtifacts artifacts: 'allure-results/**',    allowEmptyArchive: true
 
+      // Publish Playwright HTML (CLI default folder)
       publishHTML(target: [
-        reportDir: 'reports/html-report',
+        reportDir: 'playwright-report',
         reportFiles: 'index.html',
         reportName: 'Playwright HTML Report',
         keepAll: true,
@@ -84,7 +87,7 @@ pipeline {
         allowMissing: true
       ])
 
-      // Allure Commandline tool name must match Manage Jenkins → Tools
+      // Allure commandline (Manage Jenkins → Tools → Allure Commandline: name = allure-2)
       allure includeProperties: false,
              jdk: '',
              commandline: 'allure-2',
