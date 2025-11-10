@@ -66,19 +66,19 @@ pipeline {
       """
     }
   }
-  post {
-    always {
+post {
+  always {
     archiveArtifacts artifacts: 'test-results/**',           allowEmptyArchive: true
-    archiveArtifacts artifacts: 'playwright-report/**',      allowEmptyArchive: true
+    archiveArtifacts artifacts: 'reports/html-report/**',    allowEmptyArchive: true
     archiveArtifacts artifacts: 'allure-results/**',         allowEmptyArchive: true
-    }
   }
+}
 }
 
 stage('Publish HTML Report') {
   steps {
     publishHTML(target: [
-      reportDir: 'playwright-report',
+      reportDir: 'reports/html-report',
       reportFiles: 'index.html',
       reportName: 'Playwright HTML Report',
       keepAll: true,
