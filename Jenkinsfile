@@ -66,13 +66,6 @@ pipeline {
       }
     }
 
-    stage('Build Allure HTML (npx)') {
-      steps {
-        // Make the report without needing Jenkins' Allure tool
-        bat 'npx allure generate allure-results --clean -o allure-report'
-      }
-    }
-
     stage('Node setup & deps') {
   steps {
     bat 'node -v & npm -v'
