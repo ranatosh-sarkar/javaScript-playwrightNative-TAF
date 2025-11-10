@@ -52,4 +52,5 @@ module.exports = defineConfig({
   ['allure-playwright', { outputFolder: 'allure-results' }],
   ['junit', { outputFile: 'test-results/results.xml' }]
   ]
+  
 });
