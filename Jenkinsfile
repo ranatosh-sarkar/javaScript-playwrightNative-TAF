@@ -49,30 +49,31 @@ pipeline {
     }
 
     stage('Run tests') {
-      steps {
-        script {
-          def headedFlag = (PW_HEADED?.toBoolean()) ? '--headed' : ''
-          // Build grep flag safely for Windows cmd
-          def grepFlag = PW_GREP?.trim() ? "--grep \"${PW_GREP}\"" : ''
+  steps {
+    script {
+      // Read from env/params (declarative)
+      def headedFlag = (env.PW_HEADED?.toBoolean()) ? '--headed' : ''
+      def grepTxt    = env.PW_GREP?.trim()
+      def grepFlag   = grepTxt ? "--grep \"${grepTxt}\"" : ''
 
-          bat """
-            npx cross-env ENV=${ENV} ^
-            npx playwright test ${grepFlag} ^
-              --project=${PW_PROJECT} ^
-              --workers=${PW_WORKERS} ^
-              ${headedFlag} ^
-              --reporter=line,html,allure-playwright
-          """
-        }
-      }
-      post {
-        always {
-          archiveArtifacts artifacts: 'reports/html-report/**', allowEmptyArchive: true
-          archiveArtifacts artifacts: 'allure-results/**',      allowEmptyArchive: true
-          archiveArtifacts artifacts: 'test-results/**',        allowEmptyArchive: true
-        }
-      }
+      bat """
+        npx cross-env ENV=${env.ENV} ^
+        npx playwright test ${grepFlag} ^
+          --project=${params.PROJECT} ^
+          --workers=${params.WORKERS} ^
+          ${headedFlag} ^
+          --reporter=line,html,allure-playwright
+      """
     }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'test-results/**',        allowEmptyArchive: true
+      archiveArtifacts artifacts: 'reports/html-report/**', allowEmptyArchive: true
+      archiveArtifacts artifacts: 'allure-results/**',      allowEmptyArchive: true
+    }
+  }
+}
 
     stage('Publish HTML Report') {
       steps {
