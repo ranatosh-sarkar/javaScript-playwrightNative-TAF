@@ -92,8 +92,8 @@ stage('Publish Allure') {
   steps {
     allure includeProperties: false,
            jdk: '',
-           results: [[path: 'allure-results']],
-           allure installationName: 'allure-2', results: [[path: 'allure-results']]
+           installationName: 'allure-2',
+           results: [[path: 'allure-results']]
   }
 }
   }
