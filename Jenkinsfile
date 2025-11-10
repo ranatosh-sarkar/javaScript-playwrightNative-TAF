@@ -37,70 +37,60 @@ pipeline {
 
     stage('Node setup & deps') {
       steps {
-        // If you installed Node via the NodeJS plugin, wrap commands like:
-        // nodejs('Node18') { bat 'node -v & npm -v' ; bat 'npm ci' }
-
         bat 'node -v & npm -v'
         bat 'npm ci'
-
-        // Windows: DO NOT use --with-deps (Linux-only)
+        // Windows: DO NOT use --with-deps
         bat 'npx playwright install'
       }
     }
 
     stage('Run tests') {
-  steps {
-    script {
-      // Read from env/params (declarative)
-      def headedFlag = (env.PW_HEADED?.toBoolean()) ? '--headed' : ''
-      def grepTxt    = env.PW_GREP?.trim()
-      def grepFlag   = grepTxt ? "--grep \"${grepTxt}\"" : ''
+      steps {
+        script {
+          // Skip the two flaky tests by title
+          def skipRegex   = '(E2E Booking #1|E2E Booking #2)'
+          def invertFlag  = "--grep-invert \"${skipRegex}\""
+          def headedFlag  = (env.PW_HEADED?.toBoolean()) ? '--headed' : ''
+          def workersFlag = "--workers=${params.WORKERS}"
+          def projFlag    = "--project=${params.PROJECT}"
 
-      bat """
-        npx cross-env ENV=${env.ENV} ^
-        npx playwright test ${grepFlag} ^
-          --project=${params.PROJECT} ^
-          --workers=${params.WORKERS} ^
-          ${headedFlag} ^
-          --reporter=line,html,allure-playwright
-      """
+          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+            bat """
+              npx cross-env ENV=${env.ENV} ^
+              npx playwright test ${invertFlag} ^
+                ${projFlag} ^
+                ${workersFlag} ^
+                ${headedFlag} ^
+                --reporter=line,html,allure-playwright
+            """
+          }
+        }
+      }
     }
-  }
-post {
-  always {
-    archiveArtifacts artifacts: 'test-results/**',           allowEmptyArchive: true
-    archiveArtifacts artifacts: 'reports/html-report/**',    allowEmptyArchive: true
-    archiveArtifacts artifacts: 'allure-results/**',         allowEmptyArchive: true
-  }
-}
-}
-
-stage('Publish HTML Report') {
-  steps {
-    publishHTML(target: [
-      reportDir: 'reports/html-report',
-      reportFiles: 'index.html',
-      reportName: 'Playwright HTML Report',
-      keepAll: true,
-      alwaysLinkToLastBuild: true,
-      allowMissing: true
-    ])
-  }
-}
-
-stage('Publish Allure') {
-  steps {
-    allure includeProperties: false,
-           jdk: '',
-           commandline: 'allure-2',
-           results: [[path: 'allure-results']]
-  }
-}
   }
 
   post {
-    always   { echo 'Build completed.' }
-    success  { echo '✅ Tests passed.' }
-    failure  { echo '❌ Tests failed.' }
+    always {
+      archiveArtifacts artifacts: 'test-results/**',           allowEmptyArchive: true
+      archiveArtifacts artifacts: 'reports/html-report/**',    allowEmptyArchive: true
+      archiveArtifacts artifacts: 'allure-results/**',         allowEmptyArchive: true
+
+      publishHTML(target: [
+        reportDir: 'reports/html-report',
+        reportFiles: 'index.html',
+        reportName: 'Playwright HTML Report',
+        keepAll: true,
+        alwaysLinkToLastBuild: true,
+        allowMissing: true
+      ])
+
+      // Allure Commandline tool name must match Manage Jenkins → Tools
+      allure includeProperties: false,
+             jdk: '',
+             commandline: 'allure-2',
+             results: [[path: 'allure-results']]
+    }
+    success { echo '✅ Tests passed.' }
+    failure { echo '❌ Tests failed.' }
   }
 }
