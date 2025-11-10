@@ -68,37 +68,34 @@ pipeline {
   }
   post {
     always {
-      archiveArtifacts artifacts: 'test-results/**',        allowEmptyArchive: true
-      archiveArtifacts artifacts: 'reports/html-report/**', allowEmptyArchive: true
-      archiveArtifacts artifacts: 'allure-results/**',      allowEmptyArchive: true
+    archiveArtifacts artifacts: 'test-results/**',           allowEmptyArchive: true
+    archiveArtifacts artifacts: 'playwright-report/**',      allowEmptyArchive: true
+    archiveArtifacts artifacts: 'allure-results/**',         allowEmptyArchive: true
     }
   }
 }
 
-    stage('Publish HTML Report') {
-      steps {
-        publishHTML(target: [
-          reportDir: 'reports/html-report',
-          reportFiles: 'index.html',
-          reportName: 'Playwright HTML Report',
-          keepAll: true,
-          alwaysLinkToLastBuild: true,
-          allowMissing: true
-        ])
-      }
-    }
+stage('Publish HTML Report') {
+  steps {
+    publishHTML(target: [
+      reportDir: 'playwright-report',
+      reportFiles: 'index.html',
+      reportName: 'Playwright HTML Report',
+      keepAll: true,
+      alwaysLinkToLastBuild: true,
+      allowMissing: true
+    ])
+  }
+}
 
-    stage('Publish Allure') {
-      steps {
-        script {
-          try {
-            allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
-          } catch (e) {
-            echo "Allure Jenkins plugin missing or misconfigured: ${e}"
-          }
-        }
-      }
-    }
+stage('Publish Allure') {
+  steps {
+    allure includeProperties: false,
+           jdk: '',
+           results: [[path: 'allure-results']],
+           allure installationName: 'allure-2', results: [[path: 'allure-results']]
+  }
+}
   }
 
   post {
