@@ -1,0 +1,25 @@
+# node
+node_modules/
+npm-debug.log*
+yarn.lock
+
+# Playwright
+test-results/
+playwright-report/
+reports/html-report/
+.allure/
+allure-results/
+*.zip
+*.trace
+*.webm
+
+# Logs / OS cruft
+logs/
+*.log
+.DS_Store
+
+# Env / secrets
+config/.env
+
+# VS Code
+.vscode/

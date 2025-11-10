@@ -1,0 +1,23 @@
+{
+  "name": "playwrightnative",
+  "version": "1.0.0",
+  "description": "Playwright POM Framework (TDD style) with Page Objects",
+  "main": "index.js",
+  "author": "QA Team",
+  "license": "MIT",
+  "scripts": {
+    "test": "playwright test",
+    "test:QA": "cross-env ENV=QA playwright test",
+    "test:DEV": "cross-env ENV=DEV playwright test",
+    "report": "npx playwright show-report",
+    "allure:report": "allure generate allure-results --clean && allure open"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.38.0",
+    "allure-playwright": "^2.0.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1",
+    "log4js": "^6.9.1",
+    "xlsx": "^0.18.5"
+  }
+}

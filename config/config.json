@@ -1,0 +1,10 @@
+{
+  "QA": {
+    "baseURL": "https://automationintesting.online",
+    "defaultTimeout": 10000
+  },
+  "DEV": {
+    "baseURL": "https://automationintesting.online",
+    "defaultTimeout": 10000
+  }
+}
