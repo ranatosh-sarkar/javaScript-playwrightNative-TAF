@@ -1,241 +1,261 @@
-Playwright Native Test Automation Framework (JS)
+# 💻 Playwright Native Test Automation Framework (JS)
 
-A lean, opinionated Playwright + JavaScript (TDD) framework that stays clean, fast, and CI-ready. It follows DRY/KISS/SOLID, uses simple ES6 Page Objects, and ships with truthful logs + reports.
+A lean, opinionated **Playwright + JavaScript (TDD)** framework that stays clean, fast, and CI-ready.  
+It follows **DRY / KISS / SOLID**, uses simple **ES6 Page Objects**, and ships with truthful logs and reports.
 
-⚙️ Tech Stack
+---
 
-Engine: Playwright core (no external WebDriver)
+## ⚙️ Tech Stack
 
-Build & Deps: npm + package.json
+- **Engine:** Playwright core (no external WebDriver)
+- **Build & Deps:** npm + `package.json`
+- **Runner:** Playwright Test (`test`, `test.beforeEach`, projects/workers for parallel)
+- **Style:** TDD (you can layer BDD later)
+- **POM:** ES6 classes in `src/pages/` extending `BasePage`
+- **Reporting:** Playwright HTML (local) + Allure (via Jenkins plugin / CLI)
+- **Logging:** `log4js` (+ optional Playwright listeners/custom reporter)
+- **Test Data:** Excel/JSON via `excelRead.js`; specs consume via **fixtures**
+- **Env config:** `.env` + `config/config.json` via a **ConfigManager**
 
-Runner: Playwright Test (test, test.beforeEach, projects/workers for parallel)
+**Patterns**
+- **Singleton:** Config, Logger  
+- **Observer:** listeners / custom reporter for events  
+- **Factory:** _not needed_ — Playwright selects browser via CLI/projects
 
-Style: TDD (can layer BDD later)
+---
 
-POM: ES6 classes in src/pages/ extending BasePage
+## 🧩 The 5 Pillars of a SOLID TAF
 
-Reporting: Playwright HTML (local) + Allure (via Jenkins plugin)
-
-Logging: log4js (+ optional listeners/custom reporter)
-
-Test Data: Excel/JSON via ExcelRead.js; specs consume via fixtures
-
-Patterns:
-
-Singleton: Config, Logger
-
-Observer: listeners / custom reporter for events
-
-Factory: not needed—Playwright selects browser via CLI/projects
-
-🧩 The 5 Pillars of a SOLID TAF
-
-Clean Architecture Layering
+### 1️⃣ Clean Architecture Layering
 a) Build & Dependencies · b) Configuration · c) Core/Base · d) Tests & Page Objects · e) Utilities (fixtures, reporters, CI hooks)
 
-Design Patterns that serve the framework
-Singleton (config/logging), Observer (telemetry/reporting), POM (stable, intention-revealing interactions)
+### 2️⃣ Design Patterns That Serve The Framework
+Singleton (config/logging) · Observer (telemetry/reporting) · POM (stable, intention‑revealing interactions)
 
-Logs & Reports that tell the truth
-Real-time log4js + artifacts (traces, screenshots, videos)
+### 3️⃣ Logs & Reports That Tell The Truth
+Real-time `log4js` + artifacts (traces, screenshots, videos)
 
-Test Data done right
-Excel/JSON → typed access in fixtures
+### 4️⃣ Test Data Done Right
+Excel/JSON → typed access in fixtures (no hard-coded data/secrets)
 
-Parallel & Scale by default
-Projects/workers + stable sync (auto-waits, locators)
+### 5️⃣ Parallel & Scale By Default
+Projects/workers + stable sync (auto-waits, strict locators)
 
-🧠 Key Features
+---
 
-✅ DRY, KISS, SOLID throughout
+## 🧠 Key Features
 
-✅ Reusable page objects & centralized configuration
+- ✅ DRY, KISS, SOLID throughout  
+- ✅ Reusable page objects & centralized configuration  
+- ✅ Cross-browser / cross-platform ready  
+- ✅ Parallel execution with stable synchronization  
+- ✅ Version-control hygiene & CI/CD ready (Jenkins-friendly)
 
-✅ Cross-browser / cross-platform ready
+---
 
-✅ Parallel execution with stable synchronization
+## 📦 Getting Started
 
-✅ Version-control hygiene & CI/CD ready (Jenkins-friendly)
+### Prerequisites
+- Node.js **≥ 18** (LTS recommended)  
+- Git
 
-⚡ Advantages
-
-✨ Easy to maintain & extend
-
-✨ Reduces complexity, improves readability
-
-✨ Highly scalable & CI/CD ready
-
-✨ Makes testing cleaner, smarter, faster
-
-📦 Getting Started
-
-Prereqs
-
-Node.js ≥ 18 (LTS recommended)
-
-Git
-
-Install
-
+### Install
+```bash
 git clone https://github.com/<you>/javaScript-playwrightNative-TAF.git
 cd javaScript-playwrightNative-TAF
 npm ci
-npx playwright install
+npx playwright install --with-deps
+```
 
-📁 Project Structure (high-level)
-src/
-  core/            # BasePage, helpers, fixtures, logger, config
-  pages/           # ES6 POMs extending BasePage
-tests/
-  specifications/  # Playwright specs (TDD)
-config/            # env configs
-testData/          # Excel/JSON
-reports/           # html-report (local) if enabled
-allure-results/    # raw allure output (CI reads this)
-playwright-report/ # local HTML report (auto from Playwright)
+> If you plan to use environment flags like `ENV=QA`, install **cross-env**:  
+> `npm i -D cross-env`
 
-▶️ Run Tests (VS Code Terminal / any terminal)
+### Run
+```bash
+# Headed mode (example using ENV)
+npx cross-env ENV=QA playwright test --headed
 
-Windows examples shown; on macOS/Linux, drop the cross-env and use ENV=QA directly.
+# Filter by title or tag with grep
+npx cross-env ENV=QA playwright test --grep "Home Page"
 
-All tests (Chromium, default workers):
+# Choose project and workers
+npx cross-env ENV=QA playwright test --project=chromium --workers=2
 
-npx cross-env ENV=QA npx playwright test --project=Chromium --workers=4 --reporter=line,html,allure-playwright
+# UI mode (interactive)
+npx cross-env ENV=QA playwright test --ui
 
-
-Headed mode:
-
-npx cross-env ENV=QA npx playwright test --headed
-
-
-Filter by title / tag using grep:
-
-npx cross-env ENV=QA npx playwright test --grep "Home Page"
-
-
-Choose project & workers:
-
-npx cross-env ENV=QA npx playwright test --project=Firefox --workers=2
-
-
-UI Mode (interactive runner):
-
-npx cross-env ENV=QA npx playwright test --ui
-
-
-Show local HTML report after run:
-
+# Open Playwright HTML report after a run
 npx playwright show-report
+```
 
-🧪 Reports
-Playwright HTML (local)
+---
 
-Auto-generated to playwright-report/
+## 🧪 Reports
 
-Open with:
-
+### Playwright HTML (local)
+Auto-generated to **playwright-report/**. Open with:
+```bash
 npx playwright show-report
+```
 
-Allure (local, optional)
+### Allure (local optional)
+Raw data is produced by setting the reporter to include **allure-playwright**.  
+Example config snippet:
+```js
+// playwright.config.js
+reporter: [
+  ['line'],
+  ['html', { outputFolder: 'playwright-report', open: 'never' }],
+  ['allure-playwright']
+],
+use: {
+  trace: 'retain-on-failure', screenshot: 'only-on-failure', video: 'retain-on-failure'
+}
+```
 
-On dev machines you can generate and open a local Allure site if you have the CLI.
-
-# produce raw data during test run (already done by --reporter ... allure-playwright)
-# then:
+Generate & open:
+```bash
 npx allure-commandline generate allure-results --clean -o allure-report
 npx allure-commandline open allure-report
+```
 
-Allure in Jenkins (recommended)
+### Allure in Jenkins (recommended)
+- Install **Allure Jenkins Plugin** and **Allure Commandline**  
+- Pipeline snippet to publish:
+```groovy
+allure includeProperties: false, jdk: '', results: [[path: 'allure-results']]
+```
 
-Install Allure Jenkins Plugin and Allure Commandline tool (Manage Jenkins → Tools → “From Maven Central”).
+> Tip: Serve reports via CLI/CI rather than opening `index.html` from disk to avoid browser CSP issues.
 
-In pipeline, point the plugin to the raw results:
+---
 
-allure includeProperties: false, results: [[path: 'allure-results']]
+## 🐞 Debugging Guide
 
+1) **Playwright Inspector**
+```bash
+PWDEBUG=1 npx cross-env ENV=QA playwright test --project=chromium --headed
+```
+2) **Traces, Screenshots, Videos**
+```bash
+npx playwright show-trace test-results/**/trace.zip
+```
+3) **Slow down actions**
+```bash
+npx cross-env ENV=QA playwright test --headed --timeout=60000
+# or configure slowMo in playwright.config.ts/js
+```
+4) **Target a single spec or test**
+```bash
+npx cross-env ENV=QA playwright test tests/specifications/homePage.spec.js
+npx cross-env ENV=QA playwright test -g "Verify header"
+```
+5) **Extra logging**
+Set log level in `log4js.json` (e.g., DEBUG).  
+6) **Network/console**
+```js
+page.on('console', msg => {/* ... */});
+page.on('requestfailed', req => {/* ... */});
+```
 
-Jenkins plugin will generate/publish the Allure site and add an Allure Report link on the job/build page.
+---
 
-Tip: If you ever open index.html from disk (file://) and see endless Loading…, serve it via the Allure CLI or Jenkins plugin instead. Static file loads can be blocked by the browser’s CORS/content-security rules.
-
-🐞 Debugging Guide
-
-1) Playwright Inspector
-
-PWDEBUG=1 npx cross-env ENV=QA npx playwright test --project=Chromium --headed
-
-
-Opens the Inspector with step-through, locators, and snapshotting.
-
-2) Traces, Screenshots, Videos
-
-This framework already attaches artifacts on failure.
-
-After a run, open a trace:
-
-npx playwright show-trace test-results/<...>/trace.zip
-
-
-3) Slow down actions
-
-npx cross-env ENV=QA npx playwright test --headed --timeout=60000
-# or set slowMo in playwright.config if needed
-
-
-4) Target a single spec/test
-
-npx cross-env ENV=QA npx playwright test tests/specifications/homePage.spec.js
-npx cross-env ENV=QA npx playwright test -g "Verify Header and footer"
-
-
-5) Extra logging
-
-Adjust log4js level in config (e.g., DEBUG) to get more signal in console + log files.
-
-6) Network/Console troubleshooting
-
-Use page.on('console', ...)/page.on('requestfailed', ...) in Base hooks or a custom reporter to capture issues.
-
-🧰 Handy NPM Scripts (example)
+## 🧰 Handy NPM Scripts (example)
+```json
 {
   "scripts": {
     "test": "playwright test",
     "test:QA": "cross-env ENV=QA playwright test",
     "test:DEV": "cross-env ENV=DEV playwright test",
-    "report": "npx playwright show-report",
-    "allure:report": "allure generate allure-results --clean -o allure-report && allure open allure-report"
+    "report": "playwright show-report",
+    "allure:report": "allure-commandline generate allure-results --clean -o allure-report && allure-commandline open allure-report"
   }
 }
-
+```
 
 Run with:
-
+```bash
 npm run test:QA
 npm run report
 npm run allure:report
+```
 
-🏗️ CI/CD (Jenkins)
+---
 
-Use Node tool or bare Node on agents.
+## 🏗️ CI/CD (Jenkins)
 
-npm ci → npx playwright install → run tests with --reporter=line,html,allure-playwright.
+**Agent setup**
+```bash
+npm ci
+npx playwright install --with-deps
+```
 
-Publish:
+**Run tests**
+```bash
+npx cross-env ENV=QA playwright test --reporter=line,html,allure-playwright
+```
 
-Playwright HTML via HTML Publisher (directory playwright-report, file index.html).
+**Publish**
 
-Allure via Allure Jenkins Plugin (allure-results input).
+- **HTML Publisher**  
+  - Directory: `playwright-report`  
+  - Index: `index.html`
 
-Prefer not to fail the pipeline on test failures during early dev: run the test step with returnStatus: true and let Allure show pass/fail while the job remains green.
+- **Allure Jenkins Plugin**  
+  - Results: `allure-results`
 
-🙌 Conventions
+> During early development, you can keep the job green and still see failures in reports by publishing reports from post steps. Avoid masking failures long term.
 
-Small, readable specs
+---
 
-Page Objects hide selectors & flows
+## 🙌 Conventions
 
-One responsibility per module
+- Small, readable specs
+- Page Objects hide selectors & flows
+- One responsibility per module
+- Keep fixtures dumb and fast
+- Prefer **getByRole/testId** locators; avoid brittle CSS where possible
+- Review logs & traces before changing waits
 
-Keep fixtures dumb and fast
+---
 
-Review logs & traces before changing waits
+## 📁 Project Structure (high level)
+```
+PLAYWRIGHTNATIVE/
+├─ .vscode/
+│  └─ launch.json
+├─ allure-results/
+├─ config/
+│  ├─ .env
+│  └─ config.json
+├─ logs/
+├─ node_modules/
+├─ reports/
+│  └─ html-report/
+│     └─ index.html
+├─ src/
+│  ├─ core/
+│  │  └─ base.page.js
+│  ├─ pages/
+│  └─ utils/
+│     ├─ configManager.js
+│     ├─ excelRead.js
+│     ├─ logger.js
+│     └─ testUtils.js
+├─ test-results/
+├─ testData/
+│  └─ testData.xlsx
+├─ tests/
+│  ├─ specifications/
+│  │  ├─ homePage.spec.js
+│  │  ├─ sanity.spec.js
+│  │  └─ smoke.spec.js
+│  └─ fixtures.js
+├─ .gitignore
+├─ Jenkinsfile
+├─ package-lock.json
+├─ package.json
+└─ playwright.config.js
+```
+
+---
