@@ -1,232 +1,241 @@
-📘 Ready-to-Use Test Automation Framework (TAF)
-🌟 Introducing the Lean Playwright Test Automation Framework
+Playwright Native Test Automation Framework (JS)
 
-The goal is to reduce complexity, improve maintainability, and make every layer easy for anyone to pick up.
-It’s built to be clean, scalable, and future-ready — so you can build, debug, and scale fast.
+A lean, opinionated Playwright + JavaScript (TDD) framework that stays clean, fast, and CI-ready. It follows DRY/KISS/SOLID, uses simple ES6 Page Objects, and ships with truthful logs + reports.
 
-🧰 Technologies Used
+⚙️ Tech Stack
 
-Playwright core — built-in browser control (no external driver)
-
-Runner: Playwright Test (projects/workers for parallel)
+Engine: Playwright core (no external WebDriver)
 
 Build & Deps: npm + package.json
 
-Style: TDD with native specs (BDD can be layered later)
+Runner: Playwright Test (test, test.beforeEach, projects/workers for parallel)
 
-POM: ES6 classes in src/pages extending BasePage
+Style: TDD (can layer BDD later)
+
+POM: ES6 classes in src/pages/ extending BasePage
 
 Reporting: Playwright HTML (local) + Allure (via Jenkins plugin)
 
-Logging: log4js (+ custom hooks/reporters)
+Logging: log4js (+ optional listeners/custom reporter)
 
-Test Data: Excel/JSON via excelRead.js, injected via fixtures
+Test Data: Excel/JSON via ExcelRead.js; specs consume via fixtures
 
-🧱 The 5 Pillars of a Solid TAF
-1️⃣ Clean Architecture Layering
+Patterns:
 
-Clear separation → independence, maintainability, readability:
+Singleton: Config, Logger
 
-Build & Dependency Management
+Observer: listeners / custom reporter for events
 
-Configuration Layer
+Factory: not needed—Playwright selects browser via CLI/projects
 
-Core/Base Classes
+🧩 The 5 Pillars of a SOLID TAF
 
-Test & Page Objects
+Clean Architecture Layering
+a) Build & Dependencies · b) Configuration · c) Core/Base · d) Tests & Page Objects · e) Utilities (fixtures, reporters, CI hooks)
 
-Utility & Execution Layers (fixtures, reporters, CI hooks)
+Design Patterns that serve the framework
+Singleton (config/logging), Observer (telemetry/reporting), POM (stable, intention-revealing interactions)
 
-2️⃣ Design Patterns that Serve the Framework
+Logs & Reports that tell the truth
+Real-time log4js + artifacts (traces, screenshots, videos)
 
-Singleton — stable Config & Logger
+Test Data done right
+Excel/JSON → typed access in fixtures
 
-Observer — listeners/custom reporter for events & telemetry
+Parallel & Scale by default
+Projects/workers + stable sync (auto-waits, locators)
 
-POM — intention-revealing interactions; UI logic isolated
+🧠 Key Features
 
-3️⃣ Logs & Reports that Tell the Truth
+✅ DRY, KISS, SOLID throughout
 
-Real-time log4js logs (console + file)
+✅ Reusable page objects & centralized configuration
 
-Playwright HTML report for quick local triage
+✅ Cross-browser / cross-platform ready
 
-Allure report for rich history in Jenkins
+✅ Parallel execution with stable synchronization
 
-4️⃣ Test Data Done Right
+✅ Version-control hygiene & CI/CD ready (Jenkins-friendly)
 
-Externalized data (Excel/JSON) via a single data access layer
+⚡ Advantages
 
-Reusable fixtures to inject data per test/suite
+✨ Easy to maintain & extend
 
-Deterministic seeds for reproducible runs
+✨ Reduces complexity, improves readability
 
-5️⃣ Parallel & Scale by Default
+✨ Highly scalable & CI/CD ready
 
-Cross-browser, cross-platform ready
+✨ Makes testing cleaner, smarter, faster
 
-Stable synchronization & retries where they add value
+📦 Getting Started
 
-CI-first: fast feedback, minimal flake
+Prereqs
 
-📂 Project Structure (excerpt)
-├─ config/                 # env configs, test options
-├─ src/
-│  ├─ core/               # BasePage, helpers, wrappers
-│  ├─ pages/              # Page Objects (ES6 classes)
-│  └─ utils/              # logger, data readers, date ops
-├─ tests/
-│  ├─ specifications/     # spec files (TDD style)
-│  └─ fixtures.js         # data/fixtures wiring
-├─ reports/ html-report/  # Playwright HTML (local)
-├─ allure-results/        # Allure raw artifacts
-├─ playwright.config.js
-└─ package.json
+Node.js ≥ 18 (LTS recommended)
 
-▶️ How to Run (VS Code terminal or any shell)
+Git
 
-Install & prepare
+Install
 
+git clone https://github.com/<you>/javaScript-playwrightNative-TAF.git
+cd javaScript-playwrightNative-TAF
 npm ci
 npx playwright install
 
+📁 Project Structure (high-level)
+src/
+  core/            # BasePage, helpers, fixtures, logger, config
+  pages/           # ES6 POMs extending BasePage
+tests/
+  specifications/  # Playwright specs (TDD)
+config/            # env configs
+testData/          # Excel/JSON
+reports/           # html-report (local) if enabled
+allure-results/    # raw allure output (CI reads this)
+playwright-report/ # local HTML report (auto from Playwright)
 
-Run everything (default project):
+▶️ Run Tests (VS Code Terminal / any terminal)
 
-npx playwright test --reporter=line,html,allure-playwright
+Windows examples shown; on macOS/Linux, drop the cross-env and use ENV=QA directly.
 
+All tests (Chromium, default workers):
 
-Run a single project (e.g., Chromium):
-
-npx playwright test --project=Chromium --reporter=line,html,allure-playwright
-
-
-Run headed / control workers:
-
-npx playwright test --headed --workers=4 --reporter=line,html,allure-playwright
-
-
-Grep by title (include / exclude):
-
-# include
-npx playwright test --grep "Home Page"
-# exclude
-npx playwright test --grep-invert "flaky|skip"
+npx cross-env ENV=QA npx playwright test --project=Chromium --workers=4 --reporter=line,html,allure-playwright
 
 
-Open the last HTML report:
+Headed mode:
+
+npx cross-env ENV=QA npx playwright test --headed
+
+
+Filter by title / tag using grep:
+
+npx cross-env ENV=QA npx playwright test --grep "Home Page"
+
+
+Choose project & workers:
+
+npx cross-env ENV=QA npx playwright test --project=Firefox --workers=2
+
+
+UI Mode (interactive runner):
+
+npx cross-env ENV=QA npx playwright test --ui
+
+
+Show local HTML report after run:
 
 npx playwright show-report
 
-🧪 Environment & Data
+🧪 Reports
+Playwright HTML (local)
 
-Switch ENV at runtime:
+Auto-generated to playwright-report/
 
-cross-env ENV=QA npx playwright test
+Open with:
 
+npx playwright show-report
 
-ENV is consumed by configManager (Singleton) and your fixtures.
+Allure (local, optional)
 
-Excel / JSON data:
+On dev machines you can generate and open a local Allure site if you have the CLI.
 
-Put test data in testData/ (Excel or JSON).
+# produce raw data during test run (already done by --reporter ... allure-playwright)
+# then:
+npx allure-commandline generate allure-results --clean -o allure-report
+npx allure-commandline open allure-report
 
-Access via excelRead.js and typed mappers.
+Allure in Jenkins (recommended)
 
-Inject using fixtures.js to keep specs clean.
+Install Allure Jenkins Plugin and Allure Commandline tool (Manage Jenkins → Tools → “From Maven Central”).
 
-🪵 Logging (log4js)
+In pipeline, point the plugin to the raw results:
 
-Console + rolling file appender (timestamped).
-
-Per-spec correlation id for easy grepping in CI logs.
-
-Failure context is captured alongside Playwright traces.
-
-📊 Reports
-Local: Playwright HTML
-
-Auto-generated to playwright-report/.
-
-Open with npx playwright show-report.
-
-CI: Allure (via Jenkins)
-
-Specs emit allure-results automatically (allure-playwright).
-
-Jenkins Allure plugin consumes allure-results/ and renders a rich report.
-
-Artifacts archived for each build.
-
-🧰 Debugging Guide
-
-1) Headed + slowMo
-
-PWDEBUG=0 npx playwright test --headed --debug
-# or
-npx playwright test --headed --timeout=60000 --retries=0
+allure includeProperties: false, results: [[path: 'allure-results']]
 
 
-2) Pause in Inspector
+Jenkins plugin will generate/publish the Allure site and add an Allure Report link on the job/build page.
 
-// inside a spec
-await page.pause();
+Tip: If you ever open index.html from disk (file://) and see endless Loading…, serve it via the Allure CLI or Jenkins plugin instead. Static file loads can be blocked by the browser’s CORS/content-security rules.
 
+🐞 Debugging Guide
 
-Then run:
+1) Playwright Inspector
 
-npx playwright test --debug
-
-
-3) Open a failed test trace
-
-npx playwright show-trace test-results/<folder>/trace.zip
+PWDEBUG=1 npx cross-env ENV=QA npx playwright test --project=Chromium --headed
 
 
-4) Increase logs
+Opens the Inspector with step-through, locators, and snapshotting.
 
-Set logger level in logger.js (info/debug/trace).
+2) Traces, Screenshots, Videos
 
-Add DEBUG=pw:api to see Playwright API logs.
+This framework already attaches artifacts on failure.
 
-🧵 Helpful Commands (copy-paste)
-# All tests, Chromium, 4 workers, with Allure artifacts
-npx playwright test --project=Chromium --workers=4 --reporter=line,html,allure-playwright
+After a run, open a trace:
 
-# Only a suite by title
-npx playwright test -g "Sanity - E2E Booking Flow"
-
-# Retry on failure (local)
-npx playwright test --retries=1
-
-# Clean previous reports
-rimraf allure-results allure-report playwright-report
-
-🚀 CI/CD (Jenkins-Friendly)
-
-Node setup: npm ci → npx playwright install
-
-Run tests with --reporter=line,html,allure-playwright
-
-Archive artifacts: playwright-report/**, allure-results/**
-
-Allure plugin step:
-
-allure results: [[path: 'allure-results']], includeProperties: false
+npx playwright show-trace test-results/<...>/trace.zip
 
 
-(Optional) Also publish the generated HTML:
+3) Slow down actions
 
-publishHTML(target: [reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report'])
+npx cross-env ENV=QA npx playwright test --headed --timeout=60000
+# or set slowMo in playwright.config if needed
 
-✨ Why This TAF?
 
-DRY, KISS, SOLID applied consistently
+4) Target a single spec/test
 
-Reusable Page Objects & centralized config
+npx cross-env ENV=QA npx playwright test tests/specifications/homePage.spec.js
+npx cross-env ENV=QA npx playwright test -g "Verify Header and footer"
 
-Cross-browser, parallel by default
 
-Scales cleanly into CI/CD with Allure & artifacts
+5) Extra logging
 
-Easy to read, easy to change — the core of maintainability
+Adjust log4js level in config (e.g., DEBUG) to get more signal in console + log files.
+
+6) Network/Console troubleshooting
+
+Use page.on('console', ...)/page.on('requestfailed', ...) in Base hooks or a custom reporter to capture issues.
+
+🧰 Handy NPM Scripts (example)
+{
+  "scripts": {
+    "test": "playwright test",
+    "test:QA": "cross-env ENV=QA playwright test",
+    "test:DEV": "cross-env ENV=DEV playwright test",
+    "report": "npx playwright show-report",
+    "allure:report": "allure generate allure-results --clean -o allure-report && allure open allure-report"
+  }
+}
+
+
+Run with:
+
+npm run test:QA
+npm run report
+npm run allure:report
+
+🏗️ CI/CD (Jenkins)
+
+Use Node tool or bare Node on agents.
+
+npm ci → npx playwright install → run tests with --reporter=line,html,allure-playwright.
+
+Publish:
+
+Playwright HTML via HTML Publisher (directory playwright-report, file index.html).
+
+Allure via Allure Jenkins Plugin (allure-results input).
+
+Prefer not to fail the pipeline on test failures during early dev: run the test step with returnStatus: true and let Allure show pass/fail while the job remains green.
+
+🙌 Conventions
+
+Small, readable specs
+
+Page Objects hide selectors & flows
+
+One responsibility per module
+
+Keep fixtures dumb and fast
+
+Review logs & traces before changing waits
